@@ -8,6 +8,11 @@
 #define LOFI_SAMPLE_RATE 11025 
 #define DURATION    5       // seconds
 
+// Short macros for each waveform
+#define NOISE(start,end,vol)      add_white_noise(sound, total_samples, start, end, vol)
+#define SINE(start,end,freq,vol)  add_sine(sound, total_samples, start, end, freq, vol)
+#define SAW(start,end,freq,vol)   add_saw(sound, total_samples, start, end, freq, vol)
+#define SQUARE(start,end,freq,vol) add_square(sound, total_samples, start, end, freq, vol)
 
 void fill_white_noise(uint8_t *sound, uint32_t total_samples) {
     for(uint32_t i = 0; i < total_samples; i++)
@@ -115,6 +120,12 @@ int main() {
 	add_sine(sound, total_samples, 1, 2, 800, 10);
 	add_sine(sound, total_samples, 0.5, 2, 1400, 10);
 	add_sine(sound, total_samples, 1, 2, 300, 10);
+	NOISE(0, 1, 10);
+	SINE(1, 2, 200, 10);
+	SINE(0.5, 2, 300, 10);
+	SINE(1, 2, 400, 10);
+	SAW(3.5, 5, 200, 15);
+	SQUARE(2.5, 3.5, 100, 12);
 	//add_saw(sound, total_samples, 2, 3, 900, 10); //can't hear
 	//add_square(sound, total_samples, 3, 4, 1000, 10); // too agressive
 	// end of sound making zone
