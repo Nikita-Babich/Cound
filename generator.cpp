@@ -13,7 +13,19 @@ void fill_white_noise(uint8_t *sound, uint32_t total_samples) {
     for(uint32_t i = 0; i < total_samples; i++)
         sound[i] = 128 + (rand() % 65 - 32);; // random 0-255
 }
+void add_white_noise(uint8_t *sound, uint32_t total_samples,
+                     double start_time, double end_time, int volume) {
+    uint32_t start = (uint32_t)(start_time * SAMPLE_RATE);
+    uint32_t end   = (uint32_t)(end_time   * SAMPLE_RATE); 
+    if(end > total_samples) end = total_samples;
 
+    for(uint32_t i = start; i < end; i++) {
+        int sample = 128 + (rand() % (2*volume + 1) - volume); //
+        if(sample > 255) sample = 255;
+        if(sample < 0)   sample = 0;
+        sound[i] = (uint8_t)sample;
+    }
+}
 
 // Sine wave
 void add_sine(uint8_t *sound, uint32_t total_samples,
@@ -38,7 +50,8 @@ void add_saw(uint8_t *sound, uint32_t total_samples,
     uint32_t end   = (uint32_t)(end_time   * SAMPLE_RATE);
     if(end > total_samples) end = total_samples;
     for(uint32_t i = start; i < end; i++) {
-        int sample = (int)((2.0 * volume / 255) * (i * freq / SAMPLE_RATE * 255 % 255) - volume/2) + sound[i];
+    	int phase = (int)(i * freq / SAMPLE_RATE * 255) % 255;
+		int sample = ((2 * volume / 255) * phase - volume/2) + sound[i];
         if(sample > 255) sample = 255;
         if(sample < 0)   sample = 0;
         sound[i] = (uint8_t)sample;
@@ -53,7 +66,8 @@ void add_square(uint8_t *sound, uint32_t total_samples,
     uint32_t end   = (uint32_t)(end_time   * SAMPLE_RATE);
     if(end > total_samples) end = total_samples;
     for(uint32_t i = start; i < end; i++) {
-        int sample = ((i * freq / SAMPLE_RATE) % 2 == 0 ? volume : -volume) + sound[i];
+    	int phase = (int)(i * freq / SAMPLE_RATE ) % 2;
+        int sample = (phase == 0 ? volume : -volume) + sound[i];
         if(sample > 255) sample = 255;
         if(sample < 0)   sample = 0;
         sound[i] = (uint8_t)sample;
@@ -96,10 +110,13 @@ int main() {
         sound[i]=128;
 	
 	//sound making zone
-	fill_white_noise(sound, total_samples); 
-	add_sine(sound, total_samples, 0, 1, 800, 40);
-	add_saw(sound, total_samples, 1, 2, 900, 40);
-	add_square(sound, total_samples, 2, 3, 1000, 40);
+	//fill_white_noise(sound, total_samples); 
+	add_white_noise(sound, total_samples, 0, 1, 10);
+	add_sine(sound, total_samples, 1, 2, 800, 10);
+	add_sine(sound, total_samples, 0.5, 2, 1400, 10);
+	add_sine(sound, total_samples, 1, 2, 300, 10);
+	//add_saw(sound, total_samples, 2, 3, 900, 10); //can't hear
+	//add_square(sound, total_samples, 3, 4, 1000, 10); // too agressive
 	// end of sound making zone
 	
 
