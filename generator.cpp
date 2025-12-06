@@ -3,13 +3,61 @@
 #include <math.h>
 #include <stdlib.h>
 
+#define PI 3.14159265358979323846
 #define SAMPLE_RATE 44100   // standard sample rate
 #define LOFI_SAMPLE_RATE 11025 
 #define DURATION    5       // seconds
 
+
 void fill_white_noise(uint8_t *sound, uint32_t total_samples) {
     for(uint32_t i = 0; i < total_samples; i++)
         sound[i] = 128 + (rand() % 65 - 32);; // random 0-255
+}
+
+
+// Sine wave
+void add_sine(uint8_t *sound, uint32_t total_samples,
+              double start_time, double end_time,
+              double freq, int volume) {
+    uint32_t start = (uint32_t)(start_time * SAMPLE_RATE);
+    uint32_t end   = (uint32_t)(end_time   * SAMPLE_RATE);
+    if(end > total_samples) end = total_samples;
+    for(uint32_t i = start; i < end; i++) {
+        int sample = (int)(volume * sin(2*PI*freq*i/SAMPLE_RATE)) + sound[i];
+        if(sample > 255) sample = 255;
+        if(sample < 0)   sample = 0;
+        sound[i] = (uint8_t)sample;
+    }
+}
+
+// Saw wave
+void add_saw(uint8_t *sound, uint32_t total_samples,
+             double start_time, double end_time,
+             double freq, int volume) {
+    uint32_t start = (uint32_t)(start_time * SAMPLE_RATE);
+    uint32_t end   = (uint32_t)(end_time   * SAMPLE_RATE);
+    if(end > total_samples) end = total_samples;
+    for(uint32_t i = start; i < end; i++) {
+        int sample = (int)((2.0 * volume / 255) * (i * freq / SAMPLE_RATE * 255 % 255) - volume/2) + sound[i];
+        if(sample > 255) sample = 255;
+        if(sample < 0)   sample = 0;
+        sound[i] = (uint8_t)sample;
+    }
+}
+
+// Square wave
+void add_square(uint8_t *sound, uint32_t total_samples,
+                double start_time, double end_time,
+                double freq, int volume) {
+    uint32_t start = (uint32_t)(start_time * SAMPLE_RATE);
+    uint32_t end   = (uint32_t)(end_time   * SAMPLE_RATE);
+    if(end > total_samples) end = total_samples;
+    for(uint32_t i = start; i < end; i++) {
+        int sample = ((i * freq / SAMPLE_RATE) % 2 == 0 ? volume : -volume) + sound[i];
+        if(sample > 255) sample = 255;
+        if(sample < 0)   sample = 0;
+        sound[i] = (uint8_t)sample;
+    }
 }
 
 void fill_wav_header(uint8_t *header, uint32_t data_size, uint32_t sample_rate) {
@@ -49,9 +97,10 @@ int main() {
 	
 	//sound making zone
 	fill_white_noise(sound, total_samples); 
-	
-	
-	
+	add_sine(sound, total_samples, 0, 1, 800, 40);
+	add_saw(sound, total_samples, 1, 2, 900, 40);
+	add_square(sound, total_samples, 2, 3, 1000, 40);
+	// end of sound making zone
 	
 
     // Write WAV file
