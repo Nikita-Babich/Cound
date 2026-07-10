@@ -124,7 +124,7 @@ int main() {
 	SINE(1, 2, 200, 10);
 	SINE(0.5, 2, 300, 10);
 	SINE(1, 2, 400, 10);
-	SAW(3.5, 5, 200, 15);
+	//SAW(3.5, 5, 200, 15);
 	SQUARE(2.5, 3.5, 100, 12);
 	//add_saw(sound, total_samples, 2, 3, 900, 10); //can't hear
 	//add_square(sound, total_samples, 3, 4, 1000, 10); // too agressive
